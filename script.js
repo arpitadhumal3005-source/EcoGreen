@@ -1,0 +1,20 @@
+const products=[
+{id:1,name:'Bamboo Toothbrush',cat:'Personal Care',price:149,rating:4.8,eco:'Plastic-free',emoji:'🪥',desc:'Biodegradable bamboo handle with soft plant-based bristles.'},
+{id:2,name:'Reusable Cotton Bag',cat:'Bags',price:299,rating:4.9,eco:'Reusable',emoji:'👜',desc:'Strong washable cotton shopping bag for everyday use.'},
+{id:3,name:'Bamboo Water Bottle',cat:'Home',price:499,rating:4.7,eco:'Low-waste',emoji:'🍶',desc:'Stylish reusable bottle designed for everyday hydration.'},
+{id:4,name:'Organic Herbal Soap',cat:'Personal Care',price:199,rating:4.8,eco:'Natural',emoji:'🧼',desc:'Gentle handmade soap with naturally derived ingredients.'},
+{id:5,name:'Reusable Coffee Cup',cat:'Home',price:399,rating:4.6,eco:'Reusable',emoji:'☕',desc:'Leak-resistant cup for coffee, tea and cold beverages.'},
+{id:6,name:'Recycled Paper Notebook',cat:'Recycled',price:179,rating:4.7,eco:'Recycled',emoji:'📓',desc:'Premium notebook made using recycled paper.'},
+{id:7,name:'Bamboo Kitchen Set',cat:'Home',price:699,rating:4.9,eco:'Plastic-free',emoji:'🥢',desc:'Reusable bamboo utensils for a sustainable kitchen.'},
+{id:8,name:'Plantable Seed Pens',cat:'Recycled',price:249,rating:4.5,eco:'Plantable',emoji:'🌱',desc:'Paper pens containing seeds that can be planted after use.'}];
+let cart=JSON.parse(localStorage.getItem('ecogreenCart')||'[]'),category='All Products';
+const grid=document.getElementById('productsGrid'), filters=document.getElementById('filters');
+['All Products','Home','Personal Care','Bags','Recycled'].forEach(c=>{let b=document.createElement('button');b.textContent=c==='All Products'?'🌿 '+c:'♻️ '+c;b.onclick=()=>{category=c;render();};filters.appendChild(b)});
+function render(){[...filters.children].forEach((b,i)=>b.classList.toggle('active',(i===0&&category==='All Products')||b.textContent.includes(category)));let q=document.getElementById('search').value.toLowerCase();let list=products.filter(p=>(category==='All Products'||p.cat===category)&&p.name.toLowerCase().includes(q));grid.innerHTML=list.map(p=>`<article class="card"><div class="pic">${p.emoji}<span class="tag">${p.eco}</span></div><div class="body"><small>${p.cat}</small><h3>${p.name}</h3><p>${p.desc}</p><div class="rating">★★★★★ <span>${p.rating}</span></div><div class="bottom"><b>₹${p.price}</b><button class="add" onclick="add(${p.id})">Add to Cart</button></div></div></article>`).join('')||'<p>No products found.</p>';updateCart()}
+function add(id){let p=products.find(x=>x.id===id),x=cart.find(x=>x.id===id);x?x.qty++:cart.push({...p,qty:1});save();openCart()}
+function save(){localStorage.setItem('ecogreenCart',JSON.stringify(cart));updateCart()}
+function updateCart(){document.getElementById('count').textContent=cart.reduce((s,x)=>s+x.qty,0);let box=document.getElementById('cartItems');box.innerHTML=cart.length?cart.map(x=>`<div class="cart-row"><div class="cart-emoji">${x.emoji}</div><div><b>${x.name}</b><small>₹${x.price} × ${x.qty}</small><div class="qty"><button onclick="change(${x.id},-1)">−</button> ${x.qty} <button onclick="change(${x.id},1)">+</button></div></div><b>₹${x.price*x.qty}</b></div>`).join(''):'<p>Your cart is empty 🌱</p>';document.getElementById('total').textContent='₹'+cart.reduce((s,x)=>s+x.price*x.qty,0)}
+function change(id,d){let x=cart.find(x=>x.id===id);x.qty+=d;if(x.qty<=0)cart=cart.filter(x=>x.id!==id);save()}
+function toggleCart(){let p=document.getElementById('cartPanel'),s=document.getElementById('shade');p.classList.toggle('open');s.style.display=p.classList.contains('open')?'block':'none'}function openCart(){document.getElementById('cartPanel').classList.add('open');document.getElementById('shade').style.display='block'}document.getElementById('cartBtn').onclick=openCart;
+function checkout(){if(!cart.length){alert('Your cart is empty.');return}alert('Demo checkout successful! Thank you for choosing EcoGreen 🌱');cart=[];save();toggleCart()}
+document.getElementById('search').oninput=render;document.getElementById('contactForm').onsubmit=e=>{e.preventDefault();alert('Message sent successfully!');e.target.reset()};render();
